@@ -72,7 +72,7 @@ class ModelImageCollection(collections.Mapping):
             try:
                 self.loaded_fits[canonical_wavelength].close()
             except:
-                print "Failed to close model image files."
+                print( "Failed to close model image files.")
 
 
     def __len__(self):
@@ -171,7 +171,6 @@ class ModelResults(MCFOST_Dataset):
             warnings.warn("No model image results were found in that directory.")
         self._wavelengths_lookup = {}
         for wl in image_waves:
-            #print wl
             wlstring = os.path.basename(wl).split('_')[1]
             self._wavelengths_lookup[float(wlstring)] = wlstring
 
@@ -335,7 +334,7 @@ class ModelResults(MCFOST_Dataset):
             ax = plt.subplot(121)
 
         # Display the image!
-        ax = utils.imshow_with_mouseover(ax, image,  norm=norm, cmap=cmap, extent=extent)
+        ax = utils.imshow_with_mouseover(ax, image,  norm=norm, cmap=cmap, extent=extent, origin='lower')
         ax.set_xlabel("Offset [{unit}]".format(unit=axes_units))
         ax.set_ylabel("Offset [{unit}]".format(unit=axes_units))
         ax.set_title("Image for "+wavelength+" $\mu$m")
@@ -525,7 +524,6 @@ class Observations(MCFOST_Dataset):
         for i, line in enumerate(summary):
             # filename, type, wavelength (optional)
             parts = line.split()
-            #print i, parts
             _log.info("Found observations: {0} is {1}".format(parts[0], " at ".join(parts[1:])) )
             thisfile = os.path.join(self.directory, parts[0])
             filenames.append(thisfile)
