@@ -198,10 +198,12 @@ class Paramfile(object):
         set1part('l_sed_complete', lineptr, 3, bool) ; lineptr+=1
         set1part('wavelengths_file', lineptr, 1, str) ; lineptr+=1
         set1part('l_separate', lineptr, 1, bool)
-        set1part('l_stokes', lineptr, 2, bool)  ; lineptr+=3
+        set1part('l_stokes', lineptr, 2, bool)  ; lineptr+=2
 
+        # Comment out next section. This has been moved to the def wavelengths.
+        """
         # compute or look up wavelength solution
-        if self.l_complete:
+        if self.l_sed_complete:
             # use log sampled wavelength range
             wavelengths_inc=np.exp( np.log(self.lambda_max/self.lambda_min)/(self.nwavelengths) )
             self.wavelengths = self.lambda_min * wavelengths_inc**(np.arange(self.nwavelengths)+0.5)
@@ -222,6 +224,7 @@ class Paramfile(object):
             if not os.path.exists(wavelengths_file):
                 raise IOError('Cannot find requested wavelength file: '+wavelengths_file)
             self.wavelengths = astropy.io.ascii.read(wavelengths_file, data_start=0,names=['wavelength'])['wavelength']
+        """
 
         #-- Grid geometry and size --
         lineptr = skip_blank_and_comment_lines(lineptr)
@@ -246,6 +249,14 @@ class Paramfile(object):
         set1part('RT_imax', lineptr, 2, float)
         set1part('RT_n_incl',lineptr , 3, int)
         set1part('RT_centered',lineptr , 4, bool) ; lineptr+=1
+        if float(self.version) >= 3.0:
+            set1part('az_min',lineptr, 1, float)
+            set1part('az_max',lineptr, 2, float)
+            set1part('n_az',lineptr, 3, int) ; lineptr+=1
+        else:
+            self.az_min = 0.
+            self.az_max = 0.
+            self.n_az = 1
         set1part('distance', lineptr, 1, float) ; lineptr+=1
         if float(self.version) > 2.09:
             set1part('disk_pa', lineptr, 1, float) ; lineptr+=1  # only for > v2.09
@@ -284,7 +295,7 @@ class Paramfile(object):
         #-- Scattering Method --
         lineptr = skip_blank_and_comment_lines(lineptr)
         set1part('scattering_method', lineptr, 1, int) ; lineptr+=1
-        set1part('scattering_mie_hg', lineptr, 1, int) ; lineptr+=3
+        set1part('scattering_mie_hg', lineptr, 1, int) ; lineptr+=2
         #-- Symmetries --
         lineptr = skip_blank_and_comment_lines(lineptr)
         set1part('l_image_symmetry', lineptr, 1, bool) ; lineptr+=1
@@ -405,6 +416,8 @@ class Paramfile(object):
                     set1partOfDict(dust, 'mixing_rule',  lineptr, 3 if self.version >=2.17 else 2, int),
                     set1partOfDict(dust, 'porosity',     lineptr, 4 if self.version >=2.17 else 3, float),
                     set1partOfDict(dust, 'mass_fraction',lineptr, 5 if self.version >=2.17 else 4, float)
+                    if self.version >= 3.0:
+                        set1partOfDict(dust, 'vmax', lineptr, 6, float)              
                     lineptr+=1
                     if dust['ncomponents'] >1: raise NotImplementedError("Need multi-component parsing code!")
                     for icomponent in range(dust['ncomponents']):
@@ -423,6 +436,9 @@ class Paramfile(object):
                     for key, line, item, typ in dust_keys:
                         set1partOfDict(dust,key, line, item, typ)
                     lineptr+=2
+
+                self.density_zones[idensity]['dust'].append(dust)
+
 
         # molecular RT settings
         lineptr = skip_blank_and_comment_lines(lineptr)
@@ -579,6 +595,7 @@ class Paramfile(object):
 #Maps
   {self.im_nx:<3d} {self.im_ny:3d} {self.im_map_size:5.1f}        grid (nx,ny), size [AU]
   {self.RT_imin:<4.1f}  {self.RT_imax:<4.1f}  {self.RT_n_incl:>2d} {str_RT_centered}    RT: imin, imax, n_incl, centered ?
+  {self.az_min:<4.1f}  {self.az_max:<4.1f}  {self.n_az:>2d}       RT: az_min, az_max, n_az angles
   {self.distance:<6.2f}                 distance (pc)
   {self.disk_pa:<6.2f}                  disk PA
   """.format(self=self,
@@ -729,6 +746,8 @@ class Paramfile(object):
             self.star['radius'] = value
         elif paramname == 'dust_settling':
             self['dust_settling'] = value
+        elif paramname == 'settling_exp_strat':
+            self.settling_exp_strat = value
         # When iterating over properties of disk geometry,
         # generally we mean to do so over the first density zone.
         elif paramname == 'dustmass' or paramname == 'dust_mass':

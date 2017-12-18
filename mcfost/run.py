@@ -284,7 +284,7 @@ def grid_generator(base_paramfile, paramsdict, filename_prefix=None, start_count
 
         output_fn = "{0}_{1:05d}.par".format(filename_prefix, counter)
         base_paramfile.writeto(output_fn)
-        outout_fns.append(output_fn)
+        output_fns.append(output_fn)
         counter+=1
 
     return output_fns

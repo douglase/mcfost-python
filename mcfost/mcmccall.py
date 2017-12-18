@@ -20,14 +20,6 @@ from mcfost.chisqr import sed_likelihood
 
 import scipy.interpolate
 
-#import triangle
-# Necessary for mpipool:
-# import emcee
-#from emcee.utils import MPIPool
-#import sys
-
-#from mcfost import 
-
 from emcee import PTSampler
 
 import logging
@@ -35,8 +27,6 @@ _log = logging.getLogger('mcfost')
 
 
 #Set a few Parameters
-#runstring=''
-#maindirectory=''
 ndim = 5
 imwavelength = 0.8
 parameters = ['inclination','scale_height','disk_mass','alpha','beta']
@@ -51,6 +41,7 @@ obs = Observations(maindir+'data')
 autocorrfn = maindir+'mean_autocorr.npy'
 mean_autocorr = np.load(autocorrfn)
 autocorrelation = np.zeros((100))
+# Choose 1D slice of autocorrelation map
 autocorrelation[0:50] = mean_autocorr[49,49:]
 
 

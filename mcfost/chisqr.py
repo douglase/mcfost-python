@@ -71,7 +71,7 @@ def sed_chisqr(modelresults, observations, dof=1,
     mod_wavelengths = modelresults.sed.wavelength
     mod_nufnu= modelresults.sed.nu_fnu
     mod_inclinations = modelresults.parameters.inclinations
-
+   
     if plot:
         observations.sed.plot(**kwargs)
 
@@ -94,7 +94,7 @@ def sed_chisqr(modelresults, observations, dof=1,
             ax.plot(obs_wavelengths, est_mod_nufnu, color=color, marker='s', linestyle='none')
 
         if vary_distance or vary_AV:
-            residuals, best_distance, best_av, best_rv,chi2 =  fit_dist_extinct(obs_wavelengths, obs_nufnu.value, est_mod_nufnu, obs_nufnu_uncert.value, additional_free=my_dof, distance_range=distance_range, vary_av=vary_AV, vary_distance=vary_distance, av_range=AV_range)
+            residuals, best_distance, best_av, best_rv,chi2 =  fit_dist_extinct(obs_wavelengths, obs_nufnu.value, est_mod_nufnu, obs_nufnu_uncert.value, modeldist=distances[i], additional_free=my_dof, distance_range=distance_range, vary_av=vary_AV, vary_distance=vary_distance, av_range=AV_range)
         else:
             chi2 = ((obs_nufnu.value - est_mod_nufnu)**2 / obs_nufnu_uncert.value**2).sum()
 
@@ -197,7 +197,8 @@ def fit_dist_extinct(wavelength, observed_sed_nuFnu, model,
     # Scale model to 1pc
     model_sed_1pc = np.asarray(model * modeldist**2)
     if vary_distance:
-        a_distance = np.asarray(distance_range)
+        diststeps = (distance_range[1] - distance_range[0])/50.0
+        a_distance = np.arange(distance_range[0],distance_range[1],diststeps)
     else:
         a_distance = np.asarray([modeldist])
 
@@ -213,11 +214,14 @@ def fit_dist_extinct(wavelength, observed_sed_nuFnu, model,
         a_rv = np.asarray([10] + rv_range)
     else:
         a_rv = np.asarray([Rv])
-
-    if error_observed_sed_nuFnu != None:
+        
+    try:
         err_obs = np.asarray(error_observed_sed_nuFnu)
-    else:
+    except:
+        print 'assigning 10% errors.'
         err_obs = np.asarray(0.1*observed_sed_nuFnu)
+  
+    
 
     if logfit:
 
@@ -244,10 +248,10 @@ def fit_dist_extinct(wavelength, observed_sed_nuFnu, model,
                 if logfit:
                     ln_vout = vout
                     ln_vout[subset] = np.log(vout[subset])
-                    chicomb = (ln_vout-ln_observed_sed_nuFnu)**2/(ln_err_obs**2 + (ln_vout*np.log(model_noise_frac))**2)
+                    chicomb = (ln_vout-ln_observed_sed_nuFnu)**2/(ln_err_obs**2)# + (ln_vout*np.log(model_noise_frac))**2)
                 else:
-                    chicomb = (vout-observed_sed_nuFnu)**2/(err_obs**2 + (vout*model_noise_frac)**2)
-                chisqs[i_d, i_a, i_r] = np.asarray(chicomb).sum()/(dof+additional_free) #Normalize to Reduced chi square.
+                    chicomb = (vout-observed_sed_nuFnu)**2/(err_obs**2)# + (vout*model_noise_frac)**2)
+                chisqs[i_d, i_a, i_r] = np.asarray(chicomb).sum()#/(dof+additional_free) #Normalize to Reduced chi square.
 
     wmin = np.where(chisqs == np.nanmin(chisqs))
     sed_chisqr = np.nanmin(chisqs)
