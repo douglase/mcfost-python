@@ -257,6 +257,7 @@ class Paramfile(object):
             self.az_min = 0.
             self.az_max = 0.
             self.n_az = 1
+            lineptr+=1
         set1part('distance', lineptr, 1, float) ; lineptr+=1
         if float(self.version) > 2.09:
             set1part('disk_pa', lineptr, 1, float) ; lineptr+=1  # only for > v2.09
@@ -748,6 +749,8 @@ class Paramfile(object):
             self['dust_settling'] = value
         elif paramname == 'settling_exp_strat':
             self.settling_exp_strat = value
+        elif paramname == 'settling_a_strat':
+            self.settling_a_strat = value
         # When iterating over properties of disk geometry,
         # generally we mean to do so over the first density zone.
         elif paramname == 'dustmass' or paramname == 'dust_mass':

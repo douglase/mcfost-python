@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import scipy.interpolate
+import scipy.ndimage as sciim
 import astropy.units as units
 import image_registration
 
@@ -12,7 +13,7 @@ import logging
 _log = logging.getLogger('mcfost')
 
 def sed_chisqr(modelresults, observations, dof=1,
-    write=False,
+    write=False, logfit=False,
     plot=False, save=False,
     vary_distance=False, distance_range=None,
     vary_AV=False, AV_range=[0,10],
@@ -45,6 +46,8 @@ def sed_chisqr(modelresults, observations, dof=1,
         Save results to disk as FITS bintable? Default is True.
     plot : bool
         Display plot of chi^2 fit?
+    logfit: bool
+        Perform chi^2 fit in log space. Default is False
 
     """
 
@@ -71,7 +74,15 @@ def sed_chisqr(modelresults, observations, dof=1,
     mod_wavelengths = modelresults.sed.wavelength
     mod_nufnu= modelresults.sed.nu_fnu
     mod_inclinations = modelresults.parameters.inclinations
+
    
+    if logfit:
+        ln_observed_sed_nuFnu = obs_nufnu.value
+        ln_err_obs = obs_nufnu_uncert.value
+        subset = obs_nufnu != 0.0
+        ln_observed_sed_nuFnu[subset] = np.log(obs_nufnu[subset].value)
+        ln_err_obs[subset] = np.log(obs_nufnu_uncert[subset].value)
+
     if plot:
         observations.sed.plot(**kwargs)
 
@@ -96,7 +107,10 @@ def sed_chisqr(modelresults, observations, dof=1,
         if vary_distance or vary_AV:
             residuals, best_distance, best_av, best_rv,chi2 =  fit_dist_extinct(obs_wavelengths, obs_nufnu.value, est_mod_nufnu, obs_nufnu_uncert.value, modeldist=distances[i], additional_free=my_dof, distance_range=distance_range, vary_av=vary_AV, vary_distance=vary_distance, av_range=AV_range)
         else:
-            chi2 = ((obs_nufnu.value - est_mod_nufnu)**2 / obs_nufnu_uncert.value**2).sum()
+           if logfit:
+               chi2 = ((ln_observed_sed_nuFnu - np.log(est_mod_nufnu))**2 / ln_err_obs**2).sum()
+           else:
+               chi2 = ((obs_nufnu.value - est_mod_nufnu)**2 / obs_nufnu_uncert.value**2).sum()
 
         _log.info( "inclination {0} : {1:4.1f} deg has chi2 = {2:5g}".format(i, mod_inclinations[i], chi2))
 
@@ -270,8 +284,8 @@ def fit_dist_extinct(wavelength, observed_sed_nuFnu, model,
 
 
 def image_chisqr(modelresults, observations, wavelength=None, write=True,
-        normalization='total', registration='sub_pixel',
-        inclinationflag=True, convolvepsf=True):
+                 normalization='total', registration='sub_pixel',
+                 inclinationflag=True, convolvepsf=True, background=0.0):
     """
     Not written yet - this is just a placeholder
 
@@ -288,7 +302,7 @@ def image_chisqr(modelresults, observations, wavelength=None, write=True,
     if inclinationflag:
         mod_inclinations = modelresults.parameters.inclinations
     else:
-        mod_inclination = ['0.0']
+        mod_inclinations = ['0.0']
 
     im = observations.images
     mask = im[wavelength].mask
@@ -297,8 +311,7 @@ def image_chisqr(modelresults, observations, wavelength=None, write=True,
     if convolvepsf:
         psf = im[wavelength].psf
     model = modelresults.images[wavelength].data
-
-
+    
     #mask[:,:]=1
     sz = len(mod_inclinations)
     chisqr = np.zeros(sz)
@@ -315,13 +328,24 @@ def image_chisqr(modelresults, observations, wavelength=None, write=True,
         # Determine the shift between model image and observations via fft cross correlation
 
         # Normalize model to observed image and calculate chisqrd
-        weightgd=image.sum()/model_n.sum()
+        background=np.min(noise)
+        background=0.0
+        model_n+=background
+        if normalization == 'total':
+            weightgd=image.sum()/model_n.sum()
+        elif normalization == 'peak':
+            weightgd=image.max()/model_n.max()
+        else:
+            weightgd = 1.0
         model_n*=weightgd
         subgd=image-model_n
+        print 'subgd  ',np.sum(np.square(subgd))
+        print 'normalization = ',weightgd
+       
 
         #model_n=np.multiply(model_n,mask)
         #image=np.multiply(image,mask)
-        dy,dx,xerr,yerr = image_registration.chi2_shift_iterzoom(model_n,image)
+        dy,dx,xerr,yerr = image_registration.chi2_shift(model_n,image)
 
         if registration == 'integer_pixel':
             dx = np.round(dx)
@@ -329,7 +353,8 @@ def image_chisqr(modelresults, observations, wavelength=None, write=True,
         #if registration == 'sub_pixel':
             #print dx, dy
         # Shift the model image to the same location as observations
-        model_n = scipy.ndimage.interpolation.shift(model_n,np.asarray((dx,dy)))
+        model_n = sciim.interpolation.shift(model_n,np.asarray((dx,dy)))
+        print 'subgd  ',np.max(image-model_n)
 
         chisquared=(image-model_n)**2.0/noise**2.0
         chisqr[n]=chisquared[mask !=0].sum()#/2500.0

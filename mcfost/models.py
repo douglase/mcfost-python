@@ -734,14 +734,14 @@ class ModelSED(MCFOST_SED_Base):
 
 
                 plt.loglog(self.wavelength.to(units.micron).value, self.nu_fnu[i].to(units.W/units.m**2).value,
-                        label=label, linestyle=linestyle, marker=marker, color=mycolor, alpha=alpha )
+                           label=label,linestyle=linestyle, marker=marker, color=mycolor, alpha=alpha )
         else:
             # Plot one inclination
             iclosest = np.abs(self.inclinations - float(inclination)).argmin()
             label = '$i={inc:.1f}^\circ$'.format(inc=self.inclinations[iclosest])
 
             plt.loglog(self.wavelength.to(units.micron).value, self.nu_fnu[iclosest].to(units.W/units.m**2).value,
-                label=label, linestyle=linestyle, marker=marker, color=color, alpha=alpha )
+                       label=label,linestyle=linestyle, marker=marker, color=color, alpha=alpha )
 
 
 
@@ -749,7 +749,7 @@ class ModelSED(MCFOST_SED_Base):
         plt.ylabel("$\\nu F_\\nu$ (W m$^{-2}$)")
         plt.title(title)
         ax = plt.gca()
-        ax.xaxis.set_major_formatter(utils.NicerLogFormatter())
+        #ax.xaxis.set_major_formatter(utils.NicerLogFormatter())
 
         if legend:
             plt.legend(loc='upper right')
@@ -825,7 +825,7 @@ class ObservedSED(MCFOST_SED_Base):
         plt.ylabel("$\\nu F_\\nu$ (W m$^{-2}$)")
         plt.title(title)
         ax = plt.gca()
-        ax.xaxis.set_major_formatter(utils.NicerLogFormatter())
+        #ax.xaxis.set_major_formatter(utils.NicerLogFormatter())
         return ax
 
 #----------------------------------------------------
