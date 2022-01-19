@@ -99,13 +99,13 @@ def plot_lir_lstar(parfilename=None,dir="./", inclination=0):
     ldisk = integrate_channel(6) +  integrate_channel(5)
 
 
-    print("Integrated disk + star flux is %.2e W m^-2" % ltot)
-    print("Integrated star flux is %.2e W m^-2" % lstar)
-    print("Integrated disk flux is %.2e W m^-2" % ldisk)
+    print(("Integrated disk + star flux is %.2e W m^-2" % ltot))
+    print(("Integrated star flux is %.2e W m^-2" % lstar))
+    print(("Integrated disk flux is %.2e W m^-2" % ldisk))
 
     print("")
     #print "L_IR / L_star  =  %.2e "   % (ldisk/lstar)
-    print("L_IR / L_star  =  %.2e "   % ((ltot-lstar)/lstar))
+    print(("L_IR / L_star  =  %.2e "   % ((ltot-lstar)/lstar)))
 
 
 

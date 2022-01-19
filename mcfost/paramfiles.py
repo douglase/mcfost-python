@@ -147,7 +147,7 @@ class Paramfile(object):
             """ Convert dict to recarray while preserving types and names """
             dt = []
             vals = []
-            for item in somedict.items():
+            for item in list(somedict.items()):
                 deftype =  type(item[1])
                 # force longer string field because the default behavior chops it to 1 character?!?
                 # note we need to be more careful about S vs U if on Python 3
@@ -500,7 +500,7 @@ class Paramfile(object):
                 elif  options[j] == "-rt":
                     self.im_raytraced = True
         else:
-            if verbose: print "could not read in command line options from MCFOST; using default grid settings"
+            if verbose: print("could not read in command line options from MCFOST; using default grid settings")
 
         #--- Derived quantities ---
 
@@ -723,7 +723,7 @@ class Paramfile(object):
         outfile = open(outname, 'w')
         outfile.write( str(self))
         outfile.close()
-        print "  ==>> "+outname
+        print(("  ==>> "+outname))
 
     def set_parameter(self, paramname, value):
         """ Helper function for parameter setting.

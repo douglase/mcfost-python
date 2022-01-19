@@ -271,10 +271,10 @@ def grid_generator(base_paramfile, paramsdict, filename_prefix=None, start_count
 
     counter = start_counter
 
-    keys = paramsdict.keys()
+    keys = list(paramsdict.keys())
 
     # Of course the Python library has exactly the function we want here!
-    params_generator = itertools.product(*paramsdict.values())
+    params_generator = itertools.product(*list(paramsdict.values()))
 
     output_fns = []
 

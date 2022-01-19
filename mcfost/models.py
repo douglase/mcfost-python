@@ -57,17 +57,17 @@ class ModelImageCollection(collections.Mapping):
 
     @property
     def filenames(self):
-        return [self._getpath(k) for k in self.keys()]
+        return [self._getpath(k) for k in list(self.keys())]
 
     # Implement magic methods to make this compliant with the collections.Mapping abstract base class
     # that way it will behave just like a python Dict
     def keys(self):
         # cast these as a list
-        return self._modelresults._wavelengths_lookup.values()
+        return list(self._modelresults._wavelengths_lookup.values())
         #return list(self._modelresults.image_wavelengths.value)
 
     def closeimage(self):
-        for k in self.keys():
+        for k in list(self.keys()):
             canonical_wavelength = self._modelresults._standardize_wavelength(k)
             try:
                 self.loaded_fits[canonical_wavelength].close()
@@ -76,16 +76,16 @@ class ModelImageCollection(collections.Mapping):
 
 
     def __len__(self):
-        return len(self.keys())
+        return len(list(self.keys()))
 
     def __iter__(self):
-        for i in self.keys():
+        for i in list(self.keys()):
             yield self[i]
 
     def __getitem__(self, key):
         canonical_wavelength = self._modelresults._standardize_wavelength(key)
 
-        if canonical_wavelength not in self._loaded_fits.keys():
+        if canonical_wavelength not in list(self._loaded_fits.keys()):
             self._loaded_fits[canonical_wavelength] = fits.open( self._getpath(canonical_wavelength))[0]
         
         return self._loaded_fits[canonical_wavelength]
@@ -413,13 +413,13 @@ class ModelResults(MCFOST_Dataset):
 
     def describe(self):
         """ Return a descriptive brief paragraph on what results are present """
-        print("Model results in {self.directory} for {parfn}".format(self=self, parfn = os.path.basename(self._paramfilename)))
-        print("    Model has {0} inclinations from {1} to {2}".format(len(self.parameters.inclinations), min(self.parameters.inclinations), max(self.parameters.inclinations)))
+        print(("Model results in {self.directory} for {parfn}".format(self=self, parfn = os.path.basename(self._paramfilename))))
+        print(("    Model has {0} inclinations from {1} to {2}".format(len(self.parameters.inclinations), min(self.parameters.inclinations), max(self.parameters.inclinations))))
         if self.sed is None:
             print("    No SED data present")
         else:
-            print("    SED computed from {par.lambda_min} - {par.lambda_max} microns using {par.nwavelengths} wavelengths".format(par=self.parameters))
-        print("    Images computed for {0} wavelengths: {1}".format(len(self.image_wavelengths), self.image_wavelengths))
+            print(("    SED computed from {par.lambda_min} - {par.lambda_max} microns using {par.nwavelengths} wavelengths".format(par=self.parameters)))
+        print(("    Images computed for {0} wavelengths: {1}".format(len(self.image_wavelengths), self.image_wavelengths)))
 
         if os.path.exists(os.path.join(self.directory, 'data_dust/kappa.fits.gz')):
             print("    Dust scattering properties have been saved to disk for that model grain population.")
@@ -543,12 +543,12 @@ class Observations(MCFOST_Dataset):
 
     def describe(self):
         """ Return a descriptive brief paragraph on what results are present """
-        print("Observations in {self.directory}".format(self=self))
+        print(("Observations in {self.directory}".format(self=self)))
         if self.sed is None:
             print("    No SED data present")
         else:
-            print("    SED from {0} - {1} microns at {2} wavelengths".format(self.sed.wavelength.min(), self.sed.wavelength.max(), self.sed.wavelength.size))
-        print("    Images available for {0} wavelengths: {1}".format(len(self.image_wavelengths), self.image_wavelengths))
+            print(("    SED from {0} - {1} microns at {2} wavelengths".format(self.sed.wavelength.min(), self.sed.wavelength.max(), self.sed.wavelength.size)))
+        print(("    Images available for {0} wavelengths: {1}".format(len(self.image_wavelengths), self.image_wavelengths)))
 
 
 
@@ -932,7 +932,7 @@ class OBSImageCollection(collections.Mapping):
 
     @property   
     def filenames(self):
-        return [self._getpath(k) for k in self.keys()]
+        return [self._getpath(k) for k in list(self.keys())]
 
     # Implement magic methods to make this compliant with the collections.Mapping abstract base class
     # that way it will behave just like a python Dict
@@ -942,10 +942,10 @@ class OBSImageCollection(collections.Mapping):
         #return list(self._modelresults.image_wavelengths.value)
 
     def __len__(self):
-        return len(self.keys())
+        return len(list(self.keys()))
 
     def __iter__(self):
-        for i in self.keys():
+        for i in list(self.keys()):
             yield self[i]
 
     def __getitem__(self, key):
@@ -955,7 +955,7 @@ class OBSImageCollection(collections.Mapping):
 
 
         imagefilename = self.filenames[wm]
-        print("Filename for image: "+imagefilename)
+        print(("Filename for image: "+imagefilename))
         raise NotImplementedError("Not implemented yet!")
 
 class ModelImage(object):

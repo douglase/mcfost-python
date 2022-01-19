@@ -8,7 +8,7 @@ from .models import (ModelResults, Observations)
 
 
 from .plotting import (plot_seds, plot_lir_lstar, plot_images, plot_image, plot_dust)
-from chisqr import (sed_chisqr, image_chisqr, image_likelihood, sed_likelihood)
+from .chisqr import (sed_chisqr, image_chisqr, image_likelihood, sed_likelihood)
 
 from .run import (grid_generator, run_all_files, run_one_file, run_sed, run_image)
 

@@ -166,7 +166,7 @@ def setup_logging(level='INFO',  filename=None, verbose=False):
         if verbose: print("No log messages will be shown.")
     else:
         lev = logging.__dict__[level.upper()] # obtain one of the DEBUG, INFO, WARN, or ERROR constants
-        if verbose: print("Log messages of level {0} and above will be shown.".format(level))
+        if verbose: print(("Log messages of level {0} and above will be shown.".format(level)))
 
     for name in lognames:
         logging.getLogger(name).setLevel(lev)
@@ -186,7 +186,7 @@ def setup_logging(level='INFO',  filename=None, verbose=False):
         for name in lognames:
             logging.getLogger(name).addHandler(hdlr)
 
-        if verbose: print("Log outputs will also be saved to file "+filename)
+        if verbose: print(("Log outputs will also be saved to file "+filename))
         _log.debug("Log outputs will also be saved to file "+filename)
 
 def find_closest(list_, item):
@@ -283,8 +283,8 @@ def sed_from_vizier(vizier_fn,from_file=False,radius=2.0,refine=False, variable=
 
     from astroquery.vizier import Vizier
     import astropy.units as u
-    from StringIO import StringIO as BytesIO
-    from httplib import HTTPConnection
+    from io import StringIO as BytesIO
+    from http.client import HTTPConnection
  
     from astropy.table import Table
     
@@ -305,7 +305,7 @@ def sed_from_vizier(vizier_fn,from_file=False,radius=2.0,refine=False, variable=
         try:
             coords = SkyCoord.from_name(vizier_fn)
         except:
-            print 'Object name was not resolved by Simbad. Play again.'
+            print('Object name was not resolved by Simbad. Play again.')
             return False
         pos = np.fromstring(coords.to_string(), dtype=float, sep=' ')  
         ra, dec = pos

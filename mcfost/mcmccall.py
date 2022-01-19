@@ -230,7 +230,7 @@ def mcmcwrapper(theta, obs, image_covariance, sed_covariance, usematrix=False):
     except:
         #subprocess.call('rm -r '+modeldir,shell=True)
         #os.mkdir(modeldir)
-        print 'Model already exists.'
+        print('Model already exists.')
         subprocess.call('rm '+fnstring+'.para',shell=True)
         os.chdir(modeldir)
         
@@ -251,7 +251,7 @@ def mcmcwrapper(theta, obs, image_covariance, sed_covariance, usematrix=False):
                 return imageuncertainty, imchi, seduncertainty.value, sedchi
 
         except:
-             print 'Model Failed'
+             print('Model Failed')
              os.chdir(olddir)
              dummyval = 1.0e15
              if usematrix:
@@ -274,7 +274,7 @@ def mcmcwrapper(theta, obs, image_covariance, sed_covariance, usematrix=False):
     try:
         model = ModelResults(maindir+fnstring)
     except IOError:
-        print 'Model Failed'
+        print('Model Failed')
         os.chdir(olddir)
         dummyval = 1.0e15
         if usematrix:
@@ -285,7 +285,7 @@ def mcmcwrapper(theta, obs, image_covariance, sed_covariance, usematrix=False):
     try:
         obs
     except NameError:
-        print "well, it WASN'T defined after all!"
+        print("well, it WASN'T defined after all!")
         obs = Observations(maindir+'data')
         
     try:
@@ -296,7 +296,7 @@ def mcmcwrapper(theta, obs, image_covariance, sed_covariance, usematrix=False):
             imagechi = image_chisqr(model,obs,wavelength=0.8)
             sedchi = sed_chisqr(model, obs, dof=1, write=True, save=False, vary_distance=False,vary_AV=True, AV_range=[0.0,10.0])
     except:
-        print 'Model Failed'
+        print('Model Failed')
         dummyval = 1.0e15
         os.chdir(olddir)
         if usematrix:
@@ -535,7 +535,7 @@ for p, lnprob, lnlike in sampler.sample(p, iterations=niter,storechain=True):
 position = p
 np.save('p_mcmc',position)
     
-print "MCMC Complete"
+print("MCMC Complete")
 samples = sampler.chain
 np.save('run_sampler',samples)
 
@@ -553,12 +553,12 @@ for i in np.arange(ndim):
     np.savetxt(filename, arrays[i])
 
 acceptance_fraction = sampler.acceptance_fraction
-print 'acceptance_fraction: ',np.mean(sampler.acceptance_fraction)
+print('acceptance_fraction: ',np.mean(sampler.acceptance_fraction))
 np.save('acceptance_fraction',acceptance_fraction)
 
 
 
 import pdb #@@@
 pdb.set_trace() #@@@
-print 'stop here' #@@@
+print('stop here') #@@@
 

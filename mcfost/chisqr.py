@@ -7,7 +7,7 @@ import scipy.ndimage as sciim
 import astropy.units as units
 import image_registration
 
-import models
+from . import models
 from . import utils
 import logging
 _log = logging.getLogger('mcfost')
@@ -232,7 +232,7 @@ def fit_dist_extinct(wavelength, observed_sed_nuFnu, model,
     try:
         err_obs = np.asarray(error_observed_sed_nuFnu)
     except:
-        print 'assigning 10% errors.'
+        print('assigning 10% errors.')
         err_obs = np.asarray(0.1*observed_sed_nuFnu)
   
     
@@ -339,8 +339,8 @@ def image_chisqr(modelresults, observations, wavelength=None, write=True,
             weightgd = 1.0
         model_n*=weightgd
         subgd=image-model_n
-        print 'subgd  ',np.sum(np.square(subgd))
-        print 'normalization = ',weightgd
+        print('subgd  ',np.sum(np.square(subgd)))
+        print('normalization = ',weightgd)
        
 
         #model_n=np.multiply(model_n,mask)
@@ -354,7 +354,7 @@ def image_chisqr(modelresults, observations, wavelength=None, write=True,
             #print dx, dy
         # Shift the model image to the same location as observations
         model_n = sciim.interpolation.shift(model_n,np.asarray((dx,dy)))
-        print 'subgd  ',np.max(image-model_n)
+        print('subgd  ',np.max(image-model_n))
 
         chisquared=(image-model_n)**2.0/noise**2.0
         chisqr[n]=chisquared[mask !=0].sum()#/2500.0
